@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Nostr Keep</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="login-card">
+        <div class="logo">
+          <div class="logo-text">📝<span class="logo-accent">Nostr</span>Keep</div>
+        </div>
+        <p class="tagline">🔐 Your private notes, encrypted on Nostr</p>
+        <div class="login-form">
+          <div class="login-grid-row">
+            <button id="ext-login-btn" class="btn-ext">🔗 Extension</button>
+            <button id="create-btn" class="btn-create">✨ New Account</button>
+          </div>
+          <div class="divider">
+            <div class="divider-line"></div>
+            <span class="divider-text">or use your nsec</span>
+            <div class="divider-line"></div>
+          </div>
+          <div class="nsec-row">
+            <input type="password" id="nsec-input" placeholder="nsec1..." autocomplete="off" spellcheck="false" />
+            <button id="nsec-login-btn" class="btn-nsec">Login</button>
+          </div>
+          <p class="hint">Your key never leaves this device. Used only locally to sign and encrypt.</p>
+          <p id="login-error" class="error hidden"></p>
+        </div>
+        <div class="login-footer">
+          <span>⚡</span>
+          <a href="https://nostr.com" target="_blank" rel="noopener">Nostr</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="app-screen" class="screen hidden">
+      <!-- Header -->
+      <header>
+        <div class="header-row">
+          <div class="header-left">
+            <h1>📝Keep</h1>
+            <span id="note-count" class="badge">0</span>
+          </div>
+          <div class="header-right">
+            <button id="archive-btn" class="btn-ghost" title="Archive">📦</button>
+            <button id="theme-btn" class="btn-ghost" title="Toggle theme">🌙</button>
+            <span id="pubkey-display" class="pubkey-small"></span>
+            <button id="logout-btn" class="btn-ghost" title="Logout">✕</button>
+          </div>
+        </div>
+        <!-- Search bar -->
+        <div class="search-bar">
+          <div class="search-wrap">
+            <input type="search" id="search-input" class="search-input" placeholder="🔍 Search notes..." autocomplete="off" spellcheck="false" />
+            <button id="search-clear" class="search-clear">✕</button>
+          </div>
+        </div>
+        <!-- Label filter bar -->
+        <div id="label-bar" class="label-bar"></div>
+      </header>
+
+      <!-- Main Content -->
+      <main>
+        <div id="conn-status" class="status-bar">
+          <span class="dot dot-yellow"></span> Connecting to relay...
+        </div>
+
+        <!-- Pinned section -->
+        <div id="pinned-section" class="section hidden">
+          <div class="section-header">📌 Pinned</div>
+          <div id="pinned-grid" class="notes-grid"></div>
+        </div>
+
+        <!-- Notes section -->
+        <div id="notes-section" class="section">
+          <div id="section-header-label" class="section-header">Notes</div>
+          <div id="notes-grid" class="notes-grid"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">📝</div>
+          <p id="empty-msg">No notes yet</p>
+          <p class="sub">Tap + to create your first one</p>
+        </div>
+      </main>
+
+      <!-- FAB -->
+      <button id="add-btn" class="fab" title="New note">+</button>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <form id="note-form">
+          <!-- Type toggle -->
+          <div class="type-toggle">
+            <button type="button" id="type-note" class="type-btn active" data-type="note">📝 Note</button>
+            <button type="button" id="type-list" class="type-btn" data-type="list">☑ List</button>
+          </div>
+
+          <!-- Title -->
+          <div class="form-group">
+            <input type="text" id="note-title" class="input-lg" placeholder="Title..." />
+          </div>
+
+          <!-- Content (note mode) -->
+          <div class="form-group" id="content-group">
+            <textarea id="note-content" rows="5" class="textarea-lg" placeholder="Write your note..."></textarea>
+          </div>
+
+          <!-- List items (list mode) -->
+          <div class="form-group hidden" id="list-group">
+            <div id="list-items" class="list-items"></div>
+            <button type="button" id="add-item-btn" class="btn-add-item">➕ Add item</button>
+          </div>
+
+          <!-- Color picker -->
+          <div class="form-group">
+            <label class="form-label">Color</label>
+            <div id="color-picker" class="color-picker"></div>
+          </div>
+
+          <!-- Labels -->
+          <div class="form-group">
+            <input type="text" id="note-labels" class="input-sm" placeholder="Labels (comma-separated)" />
+          </div>
+
+          <!-- Reminder -->
+          <div class="form-group">
+            <label class="form-label">Reminder</label>
+            <input type="datetime-local" id="note-reminder" class="input-sm" />
+            <button type="button" id="reminder-clear" class="btn-small hidden">✕ Clear</button>
+          </div>
+
+          <!-- Pin toggle -->
+          <div class="form-group">
+            <label class="toggle-row">
+              <input type="checkbox" id="note-pinned" />
+              <span>📌 Pin this note</span>
+            </label>
+          </div>
+
+          <input type="hidden" id="note-id" value="" />
+          <div class="modal-actions">
+            <button type="button" id="modal-cancel" class="btn-secondary">Cancel</button>
+            <button type="submit" id="modal-save" class="btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div id="confirm-overlay" class="modal-overlay hidden">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h3>Confirm</h3>
+        </div>
+        <p id="confirm-msg">Are you sure?</p>
+        <div class="modal-actions">
+          <button id="confirm-no" class="btn-secondary">Cancel</button>
+          <button id="confirm-yes" class="btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Key Modal -->
+    <div id="key-modal-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>🔐 Save Your Secret Key!</h3>
+        </div>
+        <div class="modal-body" style="text-align:center;">
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">
+            This is your Nostr identity. You need it to login again later.
+          </p>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Your npub (public — share this):</div>
+            <code id="key-modal-npub" style="display:block;padding:8px;background:var(--bg-tertiary);border-radius:6px;font-size:12px;color:var(--accent);word-break:break-all;"></code>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Your nsec (🔴 KEEP PRIVATE):</div>
+            <code id="key-modal-nsec" style="display:block;padding:10px;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);border-radius:6px;font-size:12px;color:var(--danger);word-break:break-all;"></code>
+          </div>
+          <button id="key-modal-copy" class="btn-ext" style="width:100%;margin-bottom:8px;">📋 Copy nsec</button>
+          <button id="key-modal-close-btn" class="btn-create" style="width:100%;">I've Saved It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

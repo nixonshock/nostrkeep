@@ -311,6 +311,10 @@ function formatReminder(ts) {
 }
 
 // --- CRUD helpers ---
+function sortNotes() {
+  notes.sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0));
+}
+
 async function refreshNotes() {
   if (searchQuery) {
     searchInput.value = '';
@@ -330,7 +334,11 @@ async function togglePin(id) {
   note.pinned = !note.pinned;
   renderNotes();
   try {
-    await Nostr.saveNote(note);
+    const saved = await Nostr.saveNote(note);
+    const idx = notes.findIndex(n => n.id === id);
+    if (idx !== -1) notes[idx] = saved;
+    sortNotes();
+    renderNotes();
   } catch (e) {
     note.pinned = !note.pinned; // revert
     renderNotes();
@@ -345,7 +353,12 @@ async function toggleArchive(id) {
   renderNotes();
   renderLabels();
   try {
-    await Nostr.saveNote(note);
+    const saved = await Nostr.saveNote(note);
+    const idx = notes.findIndex(n => n.id === id);
+    if (idx !== -1) notes[idx] = saved;
+    sortNotes();
+    renderNotes();
+    renderLabels();
     showToast(note.archived ? 'Archived' : 'Restored', 1500);
   } catch (e) {
     note.archived = !note.archived;
@@ -361,11 +374,15 @@ async function toggleListItem(noteId, idx) {
   note.listItems[idx].checked = !note.listItems[idx].checked;
   renderNotes();
   try {
-    await Nostr.saveNote(note);
+    const saved = await Nostr.saveNote(note);
+    const nIdx = notes.findIndex(n => n.id === noteId);
+    if (nIdx !== -1) notes[nIdx] = saved;
+    sortNotes();
+    renderNotes();
   } catch (e) {
     note.listItems[idx].checked = !note.listItems[idx].checked;
     renderNotes();
-    showToast('Failed to update: ' + e.message, 3000);
+    showToast('Failed: ' + e.message, 3000);
   }
 }
 
@@ -591,8 +608,27 @@ noteForm.addEventListener('submit', async (e) => {
   try {
     const saved = await Nostr.saveNote(noteData);
     closeModal();
-    await refreshNotes();
+
+    // Optimistic local update — show instantly without waiting for relay
+    if (!id) {
+      notes.push(saved);
+    } else {
+      const idx = notes.findIndex(n => n.id === id);
+      if (idx !== -1) notes[idx] = saved;
+    }
+    sortNotes();
+    renderNotes();
+    renderLabels();
     showToast(id ? 'Updated' : 'Created', 1500);
+
+    // Background reconcile with relay (don't await)
+    Nostr.fetchNotes().then(fresh => {
+      notes = fresh;
+      sortNotes();
+      renderNotes();
+      renderLabels();
+      connStatus.innerHTML = `<span class="dot dot-green"></span> Connected · ${notes.length} notes`;
+    }).catch(() => {});
   } catch (err) {
     showToast('Failed to save: ' + err.message, 3000);
   }

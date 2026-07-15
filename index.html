@@ -55,8 +55,13 @@
             <button id="logout-btn" class="btn-ghost" title="Logout">✕</button>
           </div>
         </div>
+        <!-- Main menu -->
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="keep">📝 Keep</button>
+          <button class="tab-btn" data-tab="resource">📚 Resource</button>
+        </div>
         <!-- Search bar -->
-        <div class="search-bar">
+        <div id="search-bar" class="search-bar">
           <div class="search-wrap">
             <input type="search" id="search-input" class="search-input" placeholder="🔍 Search notes..." autocomplete="off" spellcheck="false" />
             <button id="search-clear" class="search-clear">✕</button>
@@ -89,6 +94,13 @@
           <div class="empty-icon">📝</div>
           <p id="empty-msg">No notes yet</p>
           <p class="sub">Tap + to create your first one</p>
+        </div>
+
+        <!-- Resource empty state -->
+        <div id="resource-empty" class="empty-state hidden">
+          <div class="empty-icon">📚</div>
+          <p id="resource-empty-msg">No resources yet</p>
+          <p class="sub">Bookmarks, links, and references will appear here</p>
         </div>
       </main>
 

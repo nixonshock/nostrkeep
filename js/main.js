@@ -24,6 +24,7 @@ let editingId = null;
 let showArchived = false;
 let activeLabel = 'all';
 let searchQuery = '';
+let activeTab = 'keep';
 let listEditData = []; // list items in edit modal
 
 // Check cached login
@@ -71,6 +72,8 @@ const confirmOverlay = $('#confirm-overlay');
 const confirmMsg = $('#confirm-msg');
 const confirmYes = $('#confirm-yes');
 const confirmNo = $('#confirm-no');
+const searchBar = $('#search-bar');
+const resourceEmpty = $('#resource-empty');
 
 // --- Toast ---
 function showToast(msg, duration = 2500) {
@@ -156,6 +159,28 @@ function renderLabels() {
     });
     labelBar.appendChild(btn);
   });
+}
+
+// --- Tab switching ---
+function switchTab(tab) {
+  activeTab = tab;
+  tabBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  const isKeep = tab === 'keep';
+  // Keep content
+  pinnedSection.classList.toggle('hidden', !isKeep);
+  notesGrid.classList.toggle('hidden', !isKeep);
+  sectionHeaderLabel.classList.toggle('hidden', !isKeep);
+  emptyState.classList.toggle('hidden', isKeep); // shown by renderNotes when needed
+  addBtn.classList.toggle('hidden', !isKeep);
+  // Resource content
+  resourceEmpty.classList.toggle('hidden', isKeep);
+  // Keep-only chrome
+  searchBar.classList.toggle('hidden', !isKeep);
+  labelBar.classList.toggle('hidden', !isKeep);
+  archiveBtn.classList.toggle('hidden', !isKeep);
+  noteCount.classList.toggle('hidden', !isKeep);
+  // Re-render notes when returning
+  if (isKeep) renderNotes();
 }
 
 // --- Render notes ---
@@ -612,6 +637,9 @@ modalOverlay.addEventListener('click', (e) => {
   if (e.target === modalOverlay) closeModal();
 });
 
+// --- Tab switching ---
+const tabBtns = document.querySelectorAll('.tab-btn');
+tabBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 // --- Archive toggle ---
 archiveBtn.addEventListener('click', () => {
   showArchived = !showArchived;

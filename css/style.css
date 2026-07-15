@@ -214,6 +214,37 @@ header {
 
 .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 
+/* --- Tab bar --- */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px 10px;
+  background: var(--bg-secondary);
+}
+.tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.tab-btn.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+.tab-btn:hover:not(.active) {
+  background: var(--bg-tertiary);
+}
+
 .pubkey-small {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 11px;

@@ -59,10 +59,6 @@ const noteForm = $('#note-form');
 const noteId = $('#note-id');
 const noteTitle = $('#note-title');
 const noteContent = $('#note-content');
-const typeNoteBtn = $('#type-note');
-const typeListBtn = $('#type-list');
-const contentGroup = $('#content-group');
-const listGroup = $('#list-group');
 const listItems = $('#list-items');
 const addItemBtn = $('#add-item-btn');
 const colorPicker = $('#color-picker');
@@ -256,7 +252,10 @@ function createNoteCard(note) {
   card.style.setProperty('--card-border', color.border);
 
   let bodyHtml = '';
-  if (note.type === 'list' && note.listItems && note.listItems.length > 0) {
+  if (note.content) {
+    bodyHtml += `<div class="card-content">${escapeHtml(note.content)}</div>`;
+  }
+  if (note.listItems && note.listItems.length > 0) {
     const items = note.listItems.map((item, idx) => `
       <div class="list-item${item.checked ? ' checked' : ''}">
         <span class="list-item-toggle" data-id="${escapeHtml(note.id)}" data-idx="${idx}">
@@ -266,8 +265,6 @@ function createNoteCard(note) {
       </div>
     `).join('');
     bodyHtml += `<div class="card-list">${items}</div>`;
-  } else if (note.content) {
-    bodyHtml += `<div class="card-content">${escapeHtml(note.content)}</div>`;
   }
 
   const labelsHtml = (note.labels || []).map(l =>
@@ -426,20 +423,7 @@ function closeModal() {
   noteId.value = '';
   noteReminder.value = '';
   reminderClear.classList.add('hidden');
-  // Reset type to note
-  setNoteType('note');
 }
-
-function setNoteType(type) {
-  const isNote = type === 'note';
-  typeNoteBtn.classList.toggle('active', isNote);
-  typeListBtn.classList.toggle('active', !isNote);
-  contentGroup.classList.toggle('hidden', !isNote);
-  listGroup.classList.toggle('hidden', isNote);
-}
-
-typeNoteBtn.addEventListener('click', () => setNoteType('note'));
-typeListBtn.addEventListener('click', () => setNoteType('list'));
 
 function renderColorPicker(selectedColor) {
   colorPicker.innerHTML = '';
@@ -518,7 +502,6 @@ function openAdd() {
   noteReminder.value = '';
   reminderClear.classList.add('hidden');
   notePinned.checked = false;
-  setNoteType('note');
   renderColorPicker('default');
   renderListEditor([]);
   modalOverlay.classList.remove('hidden');
@@ -531,14 +514,8 @@ function openEdit(id) {
   editingId = id;
   noteId.value = id;
   noteTitle.value = note.title || '';
-  setNoteType(note.type || 'note');
-  if ((note.type || 'note') === 'list') {
-    renderListEditor(note.listItems || []);
-    noteContent.value = '';
-  } else {
-    noteContent.value = note.content || '';
-    renderListEditor([]);
-  }
+  noteContent.value = note.content || '';
+  renderListEditor(note.listItems || []);
   renderColorPicker(note.color || 'default');
   noteLabels.value = (note.labels || []).join(', ');
   notePinned.checked = !!note.pinned;
@@ -565,9 +542,8 @@ noteForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const id = noteId.value || undefined;
-  const type = typeNoteBtn.classList.contains('active') ? 'note' : 'list';
   const title = noteTitle.value.trim() || 'Untitled';
-  const content = type === 'note' ? noteContent.value.trim() : '';
+  const content = noteContent.value.trim();
   const colorEl = colorPicker.querySelector('.color-dot.active');
   const color = colorEl ? colorEl.dataset.color : 'default';
   const labels = noteLabels.value.trim()
@@ -582,18 +558,15 @@ noteForm.addEventListener('submit', async (e) => {
     reminder = Math.floor(d.getTime() / 1000);
   }
 
-  const listItems = type === 'list'
-    ? listEditData.filter(item => item.text.trim()).map(item => ({
-        text: item.text.trim(),
-        checked: !!item.checked,
-      }))
-    : [];
+  const listItems = listEditData.filter(item => item.text.trim()).map(item => ({
+    text: item.text.trim(),
+    checked: !!item.checked,
+  }));
 
   const existing = id ? notes.find(n => n.id === id) : null;
 
   const noteData = {
     id,
-    type,
     title,
     content,
     listItems,

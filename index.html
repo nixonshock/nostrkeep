@@ -100,24 +100,18 @@
     <div id="modal-overlay" class="modal-overlay hidden">
       <div class="modal">
         <form id="note-form">
-          <!-- Type toggle -->
-          <div class="type-toggle">
-            <button type="button" id="type-note" class="type-btn active" data-type="note">📝 Note</button>
-            <button type="button" id="type-list" class="type-btn" data-type="list">☑ List</button>
-          </div>
-
           <!-- Title -->
           <div class="form-group">
             <input type="text" id="note-title" class="input-lg" placeholder="Title..." />
           </div>
 
-          <!-- Content (note mode) -->
+          <!-- Content -->
           <div class="form-group" id="content-group">
             <textarea id="note-content" rows="5" class="textarea-lg" placeholder="Write your note..."></textarea>
           </div>
 
-          <!-- List items (list mode) -->
-          <div class="form-group hidden" id="list-group">
+          <!-- List items -->
+          <div class="form-group" id="list-group">
             <div id="list-items" class="list-items"></div>
             <button type="button" id="add-item-btn" class="btn-add-item">➕ Add item</button>
           </div>

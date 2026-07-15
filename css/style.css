@@ -605,35 +605,6 @@ main {
 }
 .textarea-lg:focus { border-color: var(--accent); }
 
-/* Type toggle */
-.type-toggle {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.type-btn {
-  flex: 1;
-  padding: 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.type-btn.active {
-  background: var(--accent-dim);
-  color: var(--accent);
-  border-color: var(--accent);
-  font-weight: 600;
-}
-.type-btn:hover { border-color: var(--accent); }
-
 /* Color picker */
 .color-picker {
   display: flex;

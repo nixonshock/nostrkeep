@@ -766,12 +766,13 @@ main {
 
 .btn-secondary {
   width: 100%;
-  padding: 12px 20px;
+  padding: 12px 24px;
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--radius);
   font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
   font-family: inherit;
@@ -782,12 +783,13 @@ main {
 
 .btn-danger {
   width: 100%;
-  padding: 12px 20px;
+  padding: 12px 24px;
   background: var(--danger);
   color: #fff;
   border: none;
   border-radius: var(--radius);
   font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   font-family: inherit;
   -webkit-appearance: none;
